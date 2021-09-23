@@ -1,3 +1,4 @@
+```
 #install qemu4
 yum -y install glib2-devel pixman-devel python2 python3
 cwd=$(pwd)
@@ -179,3 +180,4 @@ echo "to exit out of VM -> Press ctrl+ ]"
 ##TODO ATTACHING PF as passthrough
 #modprobe -v vfio-pci
 #virsh attach-device centos-7.8 add_pf_pci.xml --live
+```
