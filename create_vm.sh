@@ -211,4 +211,4 @@ sed -i "s/FUNCX/$FUNCX/" add_pf_pci.xml
 virsh attach-device centos-7.8 add_pf_pci.xml --live
 virsh reboot centos-7.8
 echo "Please execute "virsh console centos-7.8" to enter inside VM"
-
+#for unknown feature amd-sev-es error do yum downgrade edk2-ovmf
