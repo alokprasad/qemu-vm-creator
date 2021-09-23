@@ -26,22 +26,22 @@ echo "please add ==>intel_iommu=on vfio_iommu_type1.allow_unsafe_interrupts=1<==
 echo "For Ubuntu -> Edit etc/default/grub  , sudo update-grub , check /boot/grub/grub.cfg"
 
 #remove qed* driver for pci passthrough
-modprobe -rv qedr 
+modprobe -rv qedr
 modprobe -rv qede
 modprobe -rv qed
 
 #hack for dns
 sed -i '1s/^/nameserver 8.8.8.8\n/' /etc/resolv.conf
 echo "==================SUPPORTED OS ========================="
-virt-builder --list | grep centos 
+virt-builder --list | grep centos
 echo "========================================================"
-echo "Enter OS from above list- Recommended centos-7.8"
-read OS
+#echo "Enter OS from above list- Recommended centos-7.8"
+#read OS
 
-#OS=centos-7.5
+OS=centos-7.8
 
 sudo chmod 0666 /dev/kvm
-# /etc/libvirt/qemu.conf user=root /group=root restart service 
+# /etc/libvirt/qemu.conf user=root /group=root restart service
 
 #generate pub key
 ssh-keygen -o
@@ -79,6 +79,8 @@ read USER
 #create devel-provision file for vm(to be use in firstboot
 cat <<'EOF' > p4config
 #creating p4config environment variable file
+export P4PORT=qidlp401.qlc.com:1667
+#export P4PORT=avp401.qlc.com:1667
 export P4USER=$USER
 export P4CLIENT=$USER_$OS-VM
 export P4CONFIG=p4config
@@ -94,7 +96,7 @@ sed -i '1s/^/user="root"\n group="root"\n/' /etc/libvirt/qemu.conf
 export LIBGUESTFS_BACKEND=direct
 
 virt-builder $OS \
---size=20G --format qcow2 -o $HOME/$OS.qcow2 \
+--size=40G --format qcow2 -o $HOME/$OS.qcow2 \
 --hostname $OS-VM \
 --network \
 --timezone Asia/Kolkata \
@@ -178,6 +180,36 @@ echo "Connect to any VM list listed above using virsh console <VMNAME>"
 echo "to exit out of VM -> Press ctrl+ ]"
 
 ##TODO ATTACHING PF as passthrough
-#modprobe -v vfio-pci
-#virsh attach-device centos-7.8 add_pf_pci.xml --live
+modprobe -v vfio-pci
+
+
+lspci | grep QL
+echo -e "Please Enter detials of PF to passthrough inside VM"
+echo -e "Enter Bus of PCI:(3b)"
+read BUSX
+echo -e "Enter dev of PCI:(00)"
+read DEVX
+echo -e "Enter function of PCI:(01)"
+read FUNCX
+
+
+#build pf passthrough file
+cat <<'EOF' >  add_pf_pci.xml
+<hostdev mode='subsystem' type='pci' managed='yes'>
+<driver name='vfio'/>
+<source>
+<address domain='0x0000' bus='0xBUSX' slot='0xDEVX' function='0xFUNCX'/>
+</source>
+<alias name='hostdev0'/>
+</hostdev>
+EOF
+sed -i "s/BUSX/$BUSX/" add_pf_pci.xml
+sed -i "s/DEVX/$DEVX/" add_pf_pci.xml
+sed -i "s/FUNCX/$FUNCX/" add_pf_pci.xml
+##endo of file
+
+
+virsh attach-device centos-7.8 add_pf_pci.xml --live
+virsh reboot centos-7.8
+echo "Please execute "virsh console centos-7.8" to enter inside VM"
 ```
