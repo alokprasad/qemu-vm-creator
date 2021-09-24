@@ -69,6 +69,19 @@ EOT
 sudo yum -y install helix-p4d
 sudo yum -y install indent
 sudo yum -y install iproute2
+sudo yum group install "Development Tools"
+yum install openssl-devel
+sudo yum install centos-release-scl
+sudo yum install devtoolset-8-gcc*
+scl enable devtoolset-8 bash
+yum install python3
+yum install pciutils-devel
+yum install rdma-core
+yum install kexec-tools
+sleep 1
+systemctl start kdump.service
+systemctl enable kdump.service
+yum install crash
 EOF
 ##endo of file
 sed  "s|BASEURL|$baseurl|g" /tmp/provision2.sh > /tmp/provision.sh
