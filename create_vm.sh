@@ -11,6 +11,7 @@ cd $cwd
 #ln -s /usr/local/bin/qemu-system-x86_64 /usr/bin/qemu-system-x86_64
 
 yum -y install libguestfs-tools libguestfs-xfs virt-top
+yum -y install libvirt-client
 echo "Checking QEMU-KVM Support, Resolve any error it throws"
 virt-host-validate
 
